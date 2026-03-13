@@ -1,6 +1,6 @@
 # clodexport
 
-Export cluster LOD hierarchy to JSON for visualization tools. Loads OBJ, runs a pluggable generator (clusterlod, trichi, or nvclusterlod), and writes JSON conforming to [schema.md](schema.md).
+Export cluster LOD hierarchy to JSON for visualization tools. Loads a model via Assimp (OBJ, FBX, glTF/GLB, STL, PLY, and other supported formats), runs a pluggable generator (clusterlod, trichi, or nvclusterlod), and writes JSON conforming to [schema.md](schema.md).
 
 ## Build
 
@@ -10,16 +10,17 @@ cmake -B build
 cmake --build build
 ```
 
-- **meshoptimizer** and **trichi** are git submodules under `deps/`. Run `git submodule update --init --recursive` to fetch them. If `deps/trichi` is not yet in the repo, add it with `git submodule add https://github.com/JolifantoBambla/trichi deps/trichi`. To build without the trichi generator: `cmake -B build -DCLODEXPORT_BUILD_TRICHI=OFF`.
+- **meshoptimizer**, **trichi**, and **assimp** are git submodules under `deps/`. Run `git submodule update --init --recursive` to fetch them. If `deps/trichi` is not yet in the repo, add it with `git submodule add https://github.com/JolifantoBambla/trichi deps/trichi`. If `deps/assimp` is not yet in the repo, add it with `git submodule add https://github.com/assimp/assimp deps/assimp`. To build without the trichi generator: `cmake -B build -DCLODEXPORT_BUILD_TRICHI=OFF`. To build without the Assimp-based model loader: `cmake -B build -DCLODEXPORT_BUILD_ASSIMP_LOADER=OFF`.
 
 - **nv_cluster_lod_builder** is an optional third generator (archived repo). Add it with `git submodule add https://github.com/nvpro-samples/nv_cluster_lod_builder deps/nv_cluster_lod_builder`, then run `git submodule update --init --recursive` in `deps/nv_cluster_lod_builder` to fetch its own submodule (nv_cluster_builder). Build with: `cmake -B build -DCLODEXPORT_BUILD_NVCLUSTERLOD=ON`. This enables the `nvclusterlod` generator and requires C++20.
 
 ## Usage
 
 ```bash
-./build/clodexport <input.obj> -o <output.json> [--no-geometry] [--generator <name>]
+./build/clodexport <input_model> -o <output.json> [--no-geometry] [--generator <name>]
 ```
 
+- **input_model**: Any model format supported by Assimp (e.g. OBJ, FBX, glTF/GLB, STL, PLY).
 - **--generator**: `clusterlod` (default), `trichi`, or `nvclusterlod` (if built in).
 - **--no-geometry**: Omit mesh and cluster indices from JSON (schema still has groups/clusters with bounds and counts).
 

@@ -2,7 +2,6 @@
 
 #include "generators/nv_cluster_lod_builder.h"
 #include "generator.h"
-#include "obj_loader.h"
 
 #include <nvcluster/nvcluster.h>
 #include <nvclusterlod/nvclusterlod_common.h>

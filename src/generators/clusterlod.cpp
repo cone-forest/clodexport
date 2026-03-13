@@ -5,7 +5,7 @@
 #include "clusterlod.h"
 
 #include "generator.h"
-#include "obj_loader.h"
+#include "model_loader.h"
 
 #include <math.h>
 #include <algorithm>

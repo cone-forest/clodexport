@@ -2,7 +2,6 @@
 
 #include "generators/trichi.h"
 #include "generator.h"
-#include "obj_loader.h"
 
 #include <trichi.hpp>
 

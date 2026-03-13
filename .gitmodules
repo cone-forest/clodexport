@@ -1,10 +1,12 @@
 [submodule "deps/meshoptimizer"]
 	path = deps/meshoptimizer
 	url = https://github.com/zeux/meshoptimizer
-
 [submodule "deps/trichi"]
 	path = deps/trichi
 	url = https://github.com/cone-forest/trichi
 [submodule "deps/nv_cluster_lod_builder"]
 	path = deps/nv_cluster_lod_builder
 	url = https://github.com/nvpro-samples/nv_cluster_lod_builder
+[submodule "deps/assimp"]
+	path = deps/assimp
+	url = https://github.com/assimp/assimp

@@ -1,10 +1,10 @@
 /**
  * clodexport - Export cluster LOD hierarchy to JSON.
- * Loads OBJ, runs one generator (clusterlod, trichi, nvclusterlod), writes JSON.
+ * Loads a model via Assimp, runs one generator (clusterlod, trichi, nvclusterlod), writes JSON.
  */
 #include "generator.h"
 #include "json_writer.h"
-#include "obj_loader.h"
+#include "model_loader.h"
 #include "generators/clusterlod.h"
 #ifdef CLODEXPORT_HAS_TRICHI
 #include "generators/trichi.h"
@@ -37,11 +37,11 @@ int main(int argc, char** argv)
 
 	if (!input_path || !output_path)
 	{
-		fprintf(stderr, "Usage: clodexport <input.obj> -o <output.json> [--no-geometry] [--generator clusterlod|trichi|nvclusterlod]\n");
+		fprintf(stderr, "Usage: clodexport <input_model> -o <output.json> [--no-geometry] [--generator clusterlod|trichi|nvclusterlod]\n");
 		return 1;
 	}
 
-	Mesh mesh = parseObj(input_path);
+	Mesh mesh = loadModel(input_path);
 	if (mesh.vertices.empty())
 		return 1;
 

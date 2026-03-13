@@ -2,41 +2,41 @@ cmake_minimum_required(VERSION 3.14)
 project(clodexport LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
+set(BUILD_SHARED_LIBS OFF)
 
-# Meshoptimizer: build only the library, not its clodexport target
+# Assimp
+option(CLODEXPORT_BUILD_ASSIMP_LOADER "Build with Assimp-based model loader" ON)
+set(CLODEXPORT_ASSIMP_SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps/assimp)
+if(CLODEXPORT_BUILD_ASSIMP_LOADER AND EXISTS ${CLODEXPORT_ASSIMP_SOURCE_DIR}/CMakeLists.txt)
+  set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_USE_HUNTER ON CACHE BOOL "" FORCE)
+  set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+  set(ASSIMP_USE_SYSTEM_ZLIB OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_BUILD_NO_OWN_ZLIB OFF CACHE BOOL "" FORCE)
+  add_subdirectory(${CLODEXPORT_ASSIMP_SOURCE_DIR} ${CMAKE_BINARY_DIR}/deps/assimp)
+endif()
+
+# Meshoptimizer
 set(MESHOPT_BUILD_DEMO OFF CACHE BOOL "" FORCE)
 set(MESHOPT_BUILD_CLODEXPORT OFF CACHE BOOL "" FORCE)
 set(MESHOPT_BUILD_GLTFPACK OFF CACHE BOOL "" FORCE)
+
 add_subdirectory(deps/meshoptimizer)
 
-# Trichi: optional second generator (git submodule at deps/trichi)
+# Trichi
 option(CLODEXPORT_BUILD_TRICHI "Build with trichi generator" ON)
 set(CLODEXPORT_TRICHI_SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps/trichi)
 if(CLODEXPORT_BUILD_TRICHI AND EXISTS ${CLODEXPORT_TRICHI_SOURCE_DIR}/CMakeLists.txt)
-  # Patch trichi to use our meshoptimizer when the target already exists (avoids duplicate symbols)
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} apply -p1 --ignore-whitespace --check ${CMAKE_SOURCE_DIR}/patches/trichi-use-existing-meshoptimizer.patch
-    WORKING_DIRECTORY ${CLODEXPORT_TRICHI_SOURCE_DIR}
-    RESULT_VARIABLE TRICHI_PATCH_CHECK
-    OUTPUT_QUIET ERROR_QUIET
-  )
-  if(TRICHI_PATCH_CHECK EQUAL 0)
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} apply -p1 --ignore-whitespace ${CMAKE_SOURCE_DIR}/patches/trichi-use-existing-meshoptimizer.patch
-      WORKING_DIRECTORY ${CLODEXPORT_TRICHI_SOURCE_DIR}
-      RESULT_VARIABLE TRICHI_PATCH_APPLY
-    )
-    if(NOT TRICHI_PATCH_APPLY EQUAL 0)
-      message(WARNING "Failed to apply trichi patch; build may fail with duplicate meshoptimizer symbols")
-    endif()
-  endif()
   set(TRICHI_BUILD_CLI OFF CACHE BOOL "" FORCE)
   add_subdirectory(${CLODEXPORT_TRICHI_SOURCE_DIR} ${CMAKE_BINARY_DIR}/deps/trichi)
 endif()
 
 add_executable(clodexport
   src/main.cpp
-  src/obj_loader.cpp
+  src/model_loader.cpp
   src/json_writer.cpp
   src/generators/clusterlod.cpp
 )
@@ -54,6 +54,9 @@ target_include_directories(clodexport PRIVATE
 )
 
 target_link_libraries(clodexport PRIVATE meshoptimizer)
+if(CLODEXPORT_BUILD_ASSIMP_LOADER AND TARGET assimp)
+  target_link_libraries(clodexport PRIVATE assimp)
+endif()
 if(CLODEXPORT_BUILD_TRICHI AND EXISTS ${CLODEXPORT_TRICHI_SOURCE_DIR}/CMakeLists.txt)
   target_link_libraries(clodexport PRIVATE trichi)
   target_include_directories(clodexport PRIVATE ${CLODEXPORT_TRICHI_SOURCE_DIR}/include)
