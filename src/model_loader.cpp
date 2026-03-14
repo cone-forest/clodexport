@@ -34,6 +34,19 @@ Mesh loadModel(const char* path)
 		return result;
 	}
 
+	// Use only the largest mesh (by face count, then vertex count)
+	unsigned int largest_mesh = 0;
+	for (unsigned int m = 1; m < scene->mNumMeshes; ++m)
+	{
+		const aiMesh* a = scene->mMeshes[largest_mesh];
+		const aiMesh* b = scene->mMeshes[m];
+		if (!b) continue;
+		const bool b_larger = (b->mNumFaces > a->mNumFaces) ||
+			(b->mNumFaces == a->mNumFaces && b->mNumVertices > a->mNumVertices);
+		if (b_larger)
+			largest_mesh = m;
+	}
+
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	vertices.reserve(1024);
@@ -41,12 +54,9 @@ Mesh loadModel(const char* path)
 
 	unsigned int vertex_offset = 0;
 
-	for (unsigned int m = 0; m < scene->mNumMeshes; ++m)
+	const aiMesh* mesh = scene->mMeshes[largest_mesh];
+	if (mesh)
 	{
-		const aiMesh* mesh = scene->mMeshes[m];
-		if (!mesh)
-			continue;
-
 		const bool has_normals = mesh->HasNormals();
 		const bool has_uv0 = mesh->HasTextureCoords(0);
 
