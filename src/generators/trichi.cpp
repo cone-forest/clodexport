@@ -319,13 +319,16 @@ bool runTrichi(const Mesh& mesh, const GeneratorOptions& opts,
 		ExportedCluster ec = {};
 		int gid = root_to_group_id[root_of[i]];
 		ec.groupId = (gid >= 0) ? gid : 0;
-		// refined = group that contains this node's children (same for all children by rule)
+		// refined = group that contains this node's children, only if that group is strictly finer (smaller depth)
 		if (children_of[i].empty())
 			ec.refined = -1;
 		else
 		{
 			int child_gid = root_to_group_id[root_of[children_of[i][0]]];
-			ec.refined = (child_gid >= 0 && child_gid != ec.groupId) ? child_gid : -1;
+			bool child_is_finer = (child_gid >= 0 && child_gid != ec.groupId &&
+			    (size_t)child_gid < groups.size() && (size_t)ec.groupId < groups.size() &&
+			    groups[child_gid].depth < groups[ec.groupId].depth);
+			ec.refined = child_is_finer ? child_gid : -1;
 		}
 
 		if (ci < hierarchy.errors.size())
