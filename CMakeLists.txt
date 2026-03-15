@@ -68,6 +68,16 @@ set(CLODEXPORT_NVCLUSTERLOD_SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps/nv_cluster_lod_b
 if(CLODEXPORT_BUILD_NVCLUSTERLOD AND EXISTS ${CLODEXPORT_NVCLUSTERLOD_SOURCE_DIR}/CMakeLists.txt)
   set(NVCLUSTERLOD_FETCH_MESHOPTIMIZER OFF CACHE BOOL "Use existing meshoptimizer" FORCE)
   add_subdirectory(${CLODEXPORT_NVCLUSTERLOD_SOURCE_DIR} ${CMAKE_BINARY_DIR}/deps/nv_cluster_lod_builder)
+  # Workaround: NVIDIA dependency code triggers -Werror with strict warnings. Suppress for these targets only.
+  if(TARGET nv_cluster_builder)
+    target_compile_options(nv_cluster_builder PRIVATE
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>)
+  endif()
+  if(TARGET nv_cluster_lod_builder)
+    target_compile_options(nv_cluster_lod_builder PRIVATE
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-but-set-variable>)
+  endif()
 endif()
 
 if(CLODEXPORT_BUILD_NVCLUSTERLOD)
